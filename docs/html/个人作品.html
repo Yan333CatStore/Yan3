@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>YAN333 - 个人作品集</title>
+  <style>
+    body { margin: 0; font-family: 'Roboto', Arial, sans-serif; background: #1a1a1a; color: #ffffff; }
+    nav {
+      position: fixed;
+      right: -66px; /* 只露出10px */
+      top: 0;
+      width: 76px;
+      height: 100vh;
+      background: rgba(255,255,255,0.45);
+      backdrop-filter: blur(4px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: right 0.3s;
+      z-index: 1000;
+    }
+    nav:hover {
+      right: 0;
+    }
+    nav a {
+      display: block;
+      margin: 32px 0;
+      color: #1A1A1A;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 18px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+      transition: color 0.3s;
+    }
+    nav a.active {
+      color: #fff;
+    }
+    .section { max-width: 1280px; margin: 0 auto; padding: 80px 0; }
+    .home { background: url('../static/image/79a186ad77960562bc5498d13d1bab35.png') no-repeat center/cover; height: 1024px; display: flex; align-items: center; }
+    .home-content { margin-left: 160px; }
+    .home-title { font-size: 72px; font-weight: bold; color: #fff; }
+    .home-desc { font-size: 24px; color: rgba(167, 167, 167, 0.5); margin-top: 24px; }
+    .about, .works, .contact { margin-top: 80px; }
+    .about-title, .works-title, .contact-title { font-size: 36px; font-weight: bold; margin-bottom: 24px; }
+    .about-desc { font-size: 24px; color: #6b7d96; margin-bottom: 32px; }
+    .exp, .edu { margin-bottom: 32px; }
+    .exp-title, .edu-title { font-size: 24px; font-weight: bold; margin-bottom: 16px; }
+    .exp-item, .edu-item { display: flex; gap: 24px; margin-bottom: 12px; }
+    .exp-time, .edu-time { color: #6b7d96; font-size: 16px; min-width: 80px; }
+    .exp-role, .edu-major { font-size: 16px; font-weight: bold; }
+    .edu-school { color: #6b7d96; font-size: 16px; }
+    .works-list, .video-list, .model-list, .new-list { display: flex; gap: 32px; margin-bottom: 32px; }
+    .works-img, .video-img, .model-img, .new-img {
+      width: 352px; height: 264px; object-fit: cover; border-radius: 8px;
+      transition: transform 0.3s cubic-bezier(.4,2,.6,1), box-shadow 0.3s;
+    }
+    .works-img:hover,
+    .video-img:hover,
+    .new-img:hover,
+    .model-img:hover {
+      transform: scale(1.08);
+      z-index: 2;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    }
+    .contact-info { display: flex; flex-direction: column; gap: 16px; }
+    .contact-item { display: flex; align-items: center; gap: 12px; color: #fff; }
+    .contact-icon { width: 20px; height: 20px; }
+    .contact-title { color: #fff; }
+    .progress-dot {
+      position: absolute;
+      left: 0px;
+      width: 82px;
+      height: 22px;
+      background: linear-gradient(135deg, #ff4d4f, #40a9ff, #36cfc9, #fadb14);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      transition: top 1.2s;
+      z-index: 0;
+    }
+    /* 图片放大模态框样式 */
+    #imgModal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0; top: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.85);
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      transition: opacity 0.3s;
+    }
+    #imgModal[style*="display: flex"] {
+      display: flex !important;
+    }
+    #imgModalImg {
+      max-width: 90vw;
+      max-height: 80vh;
+      border-radius: 8px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.5);
+      background: #fff;
+      padding: 8px;
+      position: relative;
+      z-index: 1;
+    }
+    #imgModalClose {
+      position: absolute;
+      top: 32px;
+      right: 48px;
+      color: #fff;
+      font-size: 48px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 10;
+      user-select: none;
+      transition: color 0.2s;
+    }
+    #imgModalClose:hover {
+      color: #ff4d4f;
+    }
+    .img-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 56px;
+      color: #fff;
+      background: rgba(0,0,0,0.25);
+      border-radius: 50%;
+      width: 64px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      z-index: 2;
+      transition: background 0.2s, color 0.2s;
+      opacity: 0.85;
+    }
+    .img-arrow.left { left: 32px; }
+    .img-arrow.right { right: 32px; }
+    .img-arrow:hover { background: rgba(64,169,255,0.7); color: #fff; opacity: 1; }
+    #imgModalThumbs {
+      display: flex;
+      gap: 12px;
+      margin: 32px auto 0 auto;
+      padding: 12px 24px;
+      background: rgba(30,30,30,0.7);
+      border-radius: 12px;
+      max-width: 90vw;
+      overflow-x: auto;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      z-index: 3;
+    }
+    .img-thumb {
+      width: 64px;
+      height: 48px;
+      object-fit: cover;
+      border-radius: 6px;
+      cursor: pointer;
+      opacity: 0.7;
+      border: 2px solid transparent;
+      transition: border 0.2s, opacity 0.2s, transform 0.2s;
+      background: #fff;
+      transform: scale(0.85);
+    }
+    .img-thumb.active {
+      border: 2px solid #40a9ff;
+      opacity: 1;
+      box-shadow: 0 2px 8px rgba(64,169,255,0.25);
+      transform: scale(1.2);
+    }
+
+    /*todo*/
+    .load-more-container {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .load-more-btn {
+      padding: 10px 20px;
+      font-size: 16px;
+      font-weight: bold;
+      background: #40a9ff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .load-more-btn:hover {
+      background: #1890ff;
+    }
+    .works-scroll-container,
+    .video-scroll-container,
+    .new-scroll-container,
+    .model-scroll-container {
+      display: flex;
+      overflow-x: auto;
+      padding-bottom: 16px;
+      gap: 32px;
+    }
+
+    /* 可选：添加滚动条样式 */
+    .works-scroll-container::-webkit-scrollbar,
+    .video-scroll-container::-webkit-scrollbar,
+    .new-scroll-container::-webkit-scrollbar,
+    .model-scroll-container::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .works-scroll-container::-webkit-scrollbar-thumb,
+    .video-scroll-container::-webkit-scrollbar-thumb,
+    .new-scroll-container::-webkit-scrollbar-thumb,
+    .model-scroll-container::-webkit-scrollbar-thumb {
+      background: #40a9ff;
+      border-radius: 4px;
+    }
+
+    /* 你可以根据 DSL 结构继续细化样式 */
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="progress-dot" id="progressDot"></div>
+    <a href="#home">首页</a>
+    <a href="#about">关于</a>
+    <a href="#works">作品</a>
+    <a href="#contact">联系</a>
+  </nav>
+  <section class="home section" id="home">
+    <div class="home-content">
+      <div class="home-title">YAN333</div>
+      <div class="home-desc">视觉设计师 / 3D艺术家 / 插画师</div>
+    </div>
+  </section>
+  <section class="about section" id="about">
+    <div class="about-title">关于我</div>
+    <div class="about-desc">我有着超过十年的美术学习经历，对传统架上绘画和设计都有涉猎。
+      这样的经历让我可以在创作的时候视角更加的多元化，可以让我的作品更加让人耳目一新、更好的满足设计需求。</div>
+    <div class="edu">
+      <div class="edu-title">教育背景</div>
+      <div class="edu-item">
+        <span class="edu-time">2016 - 2020</span>
+        <span class="edu-major">视觉传达设计</span>
+        <span class="edu-school">中央美术学院附属中学</span>
+        <span class="edu-time">2023 - 至今</span>
+        <span class="edu-major">数字媒体艺术</span>
+        <span class="edu-school">北京工商大学设计与艺术学院</span>
+      </div>
+    </div>
+  </section>
+  <section class="works section" id="works">
+    <div class="works-title">作品集</div>
+    <div class="works-scroll-container">
+      <div class="works-list">
+        <img class="works-img" src="../static/image/未标题-1.png" alt="平面设计1">
+        <img class="works-img" src="../static/image/c5195fe0-add1-4b09-84ba-78b42126da12.png" alt="平面设计2">
+        <img class="works-img" src="../static/image/fafa立绘.jpg" alt="平面设计3">
+      </div>
+      <button class="load-more-btn" data-type="graphic">加载更多插画作品</button>
+    </div>
+    <!-- 视频作品 -->
+    <div class="video-scroll-container">
+      <div class="video-list">
+        <video class="video-img" controls>
+          <source src="../static/video/demo1.mp4" type="video/mp4">
+          您的浏览器不支持 video 标签。
+        </video>
+
+        <video class="video-img" controls>
+          <source src="../static/video/慢步京城.mp4" type="video/mp4">
+          您的浏览器不支持 video 标签。
+        </video>
+
+        <video class="video-img" controls>
+          <source src="../static/video/剪辑3.mp4" type="video/mp4">
+          您的浏览器不支持 video 标签。
+        </video>
+
+      </div>
+      <button class="load-more-btn" data-type="video">加载更多视频作品</button>
+    </div>
+    <!-- 平面设计 -->
+    <div class="model-scroll-container">
+      <div class="model-list">
+        <img class="model-img" src="../static/平面设计/2355b528-1045-4101-aba2-e76e5d6cff5b.png" alt="3D建模1">
+        <img class="model-img" src="../static/平面设计/Image_1728993540283.jpg" alt="3D建模2">
+        <img class="model-img" src="../static/平面设计/九宫格明度对比.jpg" alt="3D建模3">
+      </div>
+      <button class="load-more-btn" data-type="model">加载更多平面设计</button>
+    </div>
+    <!-- 新的一列图片 -->
+    <div class="new-scroll-container">
+      <div class="new-list">
+        <img class="new-img" src="../static/平面设计/人物变形.jpg" alt="新作品1">
+        <img class="new-img" src="../static/平面设计/纯度对比.png" alt="新作品2">
+        <img class="new-img" src="../static/平面设计/人物变形.jpg" alt="新作品3">
+      </div>
+      <button class="load-more-btn" data-type="new">加载更多新作品</button>
+    </div>
+
+
+  </section>
+  <section class="contact section" id="contact" style="background:#1A1A1A;">
+    <div class="contact-title">联系我</div>
+    <div class="contact-info">
+      <div class="contact-item"><img class="contact-icon" src="../static/image/b09e25cb7e70e475310b090363841c49.png" alt="邮箱">siyuan.chen@design.com</div>
+      <div class="contact-item"><img class="contact-icon" src="../static/image/4794d8577faa53ae6d6f995346e6a017.png" alt="电话">+86 138 8888 8888</div>
+    </div>
+  </section>
+  <!-- 图片放大模态框 -->
+  <div id="imgModal" style="display:none;">
+    <span id="imgModalClose">&times;</span>
+    <span class="img-arrow left" id="imgArrowLeft" style="display:none;">&#8592;</span>
+    <span class="img-arrow right" id="imgArrowRight" style="display:none;">&#8594;</span>
+    <img id="imgModalImg" src="" alt="放大图片" style="display:none;">
+    <div id="imgModalContent"></div>
+    <div id="imgModalThumbs"></div>
+  </div>
+  <script>
+    // 进度方块随页面滚动移动，滚动到"关于"页面时与"关于"按钮对齐，其余时刻仍在"首页"与"联系"之间平滑移动。
+    function updateProgressDot() {
+      const dot = document.getElementById('progressDot');
+      const nav = document.querySelector('nav');
+      const navLinks = nav.querySelectorAll('a');
+      // 获取"首页"、"关于"、"联系"导航项
+      const homeLink = navLinks[0];
+      const aboutLink = navLinks[1];
+      const contactLink = navLinks[navLinks.length - 1];
+      // 计算它们的中点相对于nav的top
+      const navRect = nav.getBoundingClientRect();
+      const homeRect = homeLink.getBoundingClientRect();
+      const aboutRect = aboutLink.getBoundingClientRect();
+      const contactRect = contactLink.getBoundingClientRect();
+      const homeTop = homeRect.top - navRect.top + homeRect.height / 2 - 11;
+      const aboutTop = aboutRect.top - navRect.top + aboutRect.height / 2 - 11;
+      const contactTop = contactRect.top - navRect.top + contactRect.height / 2 - 11;
+
+      // 获取"关于"section的位置
+      const aboutSection = document.getElementById('about');
+      const aboutSectionRect = aboutSection.getBoundingClientRect();
+      const aboutSectionTop = window.scrollY + aboutSectionRect.top;
+      const aboutSectionBottom = aboutSectionTop + aboutSection.offsetHeight;
+      const scrollTop = window.scrollY;
+      const windowHeight = window.innerHeight;
+      // 判断页面是否在"关于"section
+      if (scrollTop + windowHeight/2 >= aboutSectionTop && scrollTop + windowHeight/2 < aboutSectionBottom) {
+        // 居中对齐"关于"按钮
+        dot.style.top = aboutTop + 'px';
+      } else {
+        // 其余时刻在"首页"与"联系"之间平滑移动
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        let percent = docHeight > 0 ? scrollTop / docHeight : 0;
+        const top = homeTop + percent * (contactTop - homeTop);
+        dot.style.top = top + 'px';
+      }
+    }
+
+    // 导航高亮
+    function updateNavActive() {
+      const sections = [
+        document.getElementById('home'),
+        document.getElementById('about'),
+        document.getElementById('works'),
+        document.getElementById('contact')
+      ];
+      const navLinks = document.querySelectorAll('nav a');
+      const scrollPos = window.scrollY + window.innerHeight / 2;
+      let activeIdx = 0;
+      for (let i = 0; i < sections.length; i++) {
+        const sec = sections[i];
+        const top = sec.offsetTop;
+        const bottom = top + sec.offsetHeight;
+        if (scrollPos >= top && scrollPos < bottom) {
+          activeIdx = i;
+          break;
+        }
+      }
+      navLinks.forEach((a, i) => {
+        if (i === activeIdx) {
+          a.classList.add('active');
+        } else {
+          a.classList.remove('active');
+        }
+      });
+    }
+    function getFirstFrame(videoElement, callback) {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      // 等待视频加载到可以播放的状态
+      const onCanPlay = () => {
+        videoElement.currentTime = 0.1; // 跳转到接近开头的位置
+      };
+
+      const onSeeked = () => {
+        canvas.width = videoElement.videoWidth;
+        canvas.height = videoElement.videoHeight;
+
+        ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+        const base64Image = canvas.toDataURL('image/jpeg'); // 转换为 base64
+        callback(base64Image);
+      };
+
+      if (videoElement.readyState >= 2) {
+        onCanPlay();
+      } else {
+        videoElement.addEventListener('canplay', onCanPlay);
+      }
+
+      videoElement.addEventListener('seeked', onSeeked);
+
+      // 清理事件监听器
+      function cleanup() {
+        videoElement.removeEventListener('canplay', onCanPlay);
+        videoElement.removeEventListener('seeked', onSeeked);
+        videoElement.removeEventListener('error', onError);
+        videoElement.pause();
+        videoElement.src = '';
+        videoElement.load();
+      }
+
+      function onError(e) {
+        console.error('视频加载失败:', e);
+        cleanup();
+      }
+
+      videoElement.addEventListener('error', onError);
+    }
+    window.addEventListener('scroll', updateProgressDot);
+    window.addEventListener('resize', updateProgressDot);
+    document.addEventListener('DOMContentLoaded', updateProgressDot);
+    window.addEventListener('scroll', updateNavActive);
+    window.addEventListener('resize', updateNavActive);
+    document.addEventListener('DOMContentLoaded', updateNavActive);
+    document.querySelectorAll('.video-img').forEach(video => {
+      getFirstFrame(video, (cover) => {
+        video.poster = cover;
+      });
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+      const modal = document.getElementById('imgModal');
+      const modalImg = document.getElementById('imgModalImg');
+      const modalContent = document.getElementById('imgModalContent');
+      const closeBtn = document.getElementById('imgModalClose');
+      const arrowLeft = document.getElementById('imgArrowLeft');
+      const arrowRight = document.getElementById('imgArrowRight');
+      const thumbsContainer = document.getElementById('imgModalThumbs');
+
+      let currentType = 'graphic'; // 默认分类
+      let currentGroupIndex = 0;
+
+      // 初始分组集合
+      let imageGroups = {
+        graphic: Array.from(document.querySelectorAll('.works-img')),
+        video: Array.from(document.querySelectorAll('.video-img')),
+        model: Array.from(document.querySelectorAll('.model-img')),
+        new: Array.from(document.querySelectorAll('.new-img'))
+      };
+
+      // 更新分组数据
+      function updateImageGroups() {
+        imageGroups = {
+          graphic: Array.from(document.querySelectorAll('.works-img')),
+          video: Array.from(document.querySelectorAll('.video-img')),
+          model: Array.from(document.querySelectorAll('.model-img')),
+          new: Array.from(document.querySelectorAll('.new-img'))
+        };
+      }
+
+      // 渲染缩略图
+      function renderThumbs(currentSrc, type) {
+        thumbsContainer.innerHTML = '';
+        currentType = type;
+        const group = imageGroups[type];
+
+        group.forEach((item, idx) => {
+          const thumb = document.createElement('img');
+          let src = '';
+
+          // 处理图片和视频的不同获取方式
+          if (type === 'video') {
+            // 如果是 <video> 类型，从 <source> 获取 src 或使用 poster
+            const source = item.querySelector('source');
+            const videoPoster = item.poster; // 获取 poster
+            src = videoPoster || (source ? source.src : '');
+          } else {
+            // 图片类型直接取 .src
+            src = item.src;
+          }
+
+          thumb.src = src;
+          thumb.alt = item.alt || '缩略图';
+          thumb.className = 'img-thumb' + (src === currentSrc ? ' active' : '');
+          thumbsContainer.appendChild(thumb);
+
+          // 缩略图点击事件
+          thumb.addEventListener('click', function (e) {
+            e.stopPropagation();
+
+            if (type === 'video') {
+              const newVideo = document.createElement('video');
+              newVideo.src = src;
+              newVideo.controls = true;
+              newVideo.autoplay = true;
+              newVideo.muted = true;
+              newVideo.style.maxWidth = '90vw';
+              newVideo.style.maxHeight = '80vh';
+              newVideo.style.borderRadius = '8px';
+              newVideo.style.background = '#fff';
+              newVideo.style.position = 'relative';
+              newVideo.style.zIndex = '1';
+
+              modalContent.innerHTML = '';
+              modalContent.appendChild(newVideo);
+            } else {
+              const newImg = document.createElement('img');
+              newImg.src = src;
+              newImg.alt = item.alt || '预览图';
+              newImg.style.maxWidth = '90vw';
+              newImg.style.maxHeight = '80vh';
+              newImg.style.borderRadius = '8px';
+              newImg.style.background = '#fff';
+              newImg.style.padding = '8px';
+              newImg.style.position = 'relative';
+              newImg.style.zIndex = '1';
+
+              modalContent.innerHTML = '';
+              modalContent.appendChild(newImg);
+            }
+
+            renderThumbs(src, type);
+          });
+        });
+
+        // 更新当前索引
+        currentGroupIndex = group.findIndex(item => {
+          if (type === 'video') {
+            const source = item.querySelector('source');
+            const videoPoster = item.poster;
+            const itemSrc = videoPoster || (source ? source.src : '');
+            return itemSrc === currentSrc;
+          } else {
+            return item.src === currentSrc;
+          }
+        });
+      }
+
+
+
+      // 绑定点击图片打开模态框
+      function bindImageClickEvents(images) {
+        images.forEach(img => {
+          img.addEventListener('click', function () {
+            let type = '';
+            if (this.classList.contains('works-img')) type = 'graphic';
+            else if (this.classList.contains('video-img')) type = 'video';
+            else if (this.classList.contains('model-img')) type = 'model';
+            else if (this.classList.contains('new-img')) type = 'new';
+
+            modal.style.display = 'flex';
+            thumbsContainer.innerHTML = '';
+
+            // 如果是视频
+            if (type === 'video') {
+              const videoSrc = this.querySelector('source')?.src || this.src;
+              const newVideo = document.createElement('video');
+              newVideo.src = videoSrc;
+              newVideo.controls = true;
+              newVideo.autoplay = true;
+              newVideo.muted = true;
+              newVideo.style.maxWidth = '90vw';
+              newVideo.style.maxHeight = '80vh';
+              newVideo.style.borderRadius = '8px';
+              newVideo.style.background = '#fff';
+              newVideo.style.position = 'relative';
+              newVideo.style.zIndex = '1';
+
+              // 清空并插入新视频
+              modalContent.innerHTML = '';
+              modalContent.appendChild(newVideo);
+
+              renderThumbs(videoSrc, type);
+            } else {
+              // 图片保持原样
+              const newImg = document.createElement('img');
+              newImg.src = this.src;
+              newImg.alt = this.alt;
+              newImg.style.maxWidth = '90vw';
+              newImg.style.maxHeight = '80vh';
+              newImg.style.borderRadius = '8px';
+              newImg.style.background = '#fff';
+              newImg.style.padding = '8px';
+              newImg.style.position = 'relative';
+              newImg.style.zIndex = '1';
+
+              modalContent.innerHTML = '';
+              modalContent.appendChild(newImg);
+
+              renderThumbs(this.src, type);
+            }
+          });
+        });
+      }
+
+
+      // 初始化所有图片点击事件
+      bindImageClickEvents(document.querySelectorAll('.works-img, .video-img, .model-img, .new-img'));
+
+      // 关闭模态框
+      closeBtn.addEventListener('click', function () {
+        modal.style.display = 'none';
+        modalImg.src = '';
+      });
+
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) {
+          modal.style.display = 'none';
+          modalImg.src = '';
+        }
+      });
+
+      // 鼠标移动显示左右箭头
+      modalImg.addEventListener('mousemove', function (e) {
+        const rect = modalImg.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        if (x < rect.width / 2) {
+          arrowLeft.style.display = 'flex';
+          arrowRight.style.display = 'none';
+        } else {
+          arrowLeft.style.display = 'none';
+          arrowRight.style.display = 'flex';
+        }
+      });
+
+      modalImg.addEventListener('mouseleave', function () {
+        arrowLeft.style.display = 'none';
+        arrowRight.style.display = 'none';
+      });
+
+      arrowLeft.addEventListener('click', function () {
+        const item = group[currentGroupIndex];
+        showModalContent(item, currentType);
+      });
+
+      arrowRight.addEventListener('click', function () {
+        const item = group[currentGroupIndex];
+        showModalContent(item, currentType);
+      });
+
+      // 滚轮切换
+      modal.addEventListener('wheel', function (e) {
+        if (modal.style.display !== 'flex') return;
+        e.preventDefault();
+
+        const group = imageGroups[currentType];
+        if (e.deltaY > 0) {
+          currentGroupIndex = (currentGroupIndex + 1) % group.length;
+        } else {
+          currentGroupIndex = (currentGroupIndex - 1 + group.length) % group.length;
+        }
+
+        modalImg.src = group[currentGroupIndex].src;
+        renderThumbs(group[currentGroupIndex].src, currentType);
+      }, { passive: false });
+
+      function showModalContent(item, type) {
+        modalContent.innerHTML = ''; // 清空旧内容
+
+        if (type === 'video') {
+          const source = item.querySelector('source');
+          const newVideo = document.createElement('video');
+          newVideo.src = source ? source.src : item.src;
+          newVideo.controls = true;
+          newVideo.autoplay = true;
+          newVideo.muted = true;
+          newVideo.style.maxWidth = '90vw';
+          newVideo.style.maxHeight = '80vh';
+          newVideo.style.borderRadius = '8px';
+          newVideo.style.background = '#fff';
+          newVideo.style.position = 'relative';
+          newVideo.style.zIndex = '1';
+
+          modalContent.appendChild(newVideo);
+        } else {
+          const newImg = document.createElement('img');
+          newImg.src = item.src;
+          newImg.alt = item.alt;
+          newImg.style.maxWidth = '90vw';
+          newImg.style.maxHeight = '80vh';
+          newImg.style.borderRadius = '8px';
+          newImg.style.background = '#fff';
+          newImg.style.padding = '8px';
+          newImg.style.position = 'relative';
+          newImg.style.zIndex = '1';
+
+          modalContent.appendChild(newImg);
+        }
+
+        // 更新缩略图
+        const src = type === 'video' ? (item.querySelector('source')?.src || item.src) : item.src;
+        renderThumbs(src, type);
+      }
+
+
+
+      // 加载更多图片
+      const moreImages = {
+        graphic: [
+          '../static/平面设计/人物变形.jpg',
+          '../static/平面设计/浪漫风格.png'
+        ],
+        video: [
+          // { src: '../static/video/demo1.mp4', type: 'video/mp4' },
+          { src: '../static/video/慢步京城.mp4', type: 'video/mp4' }
+        ],
+        model: [
+          '../static/平面设计/浪漫风格.png',
+          '../static/平面设计/人物变形.jpg'
+        ],
+        new: [ // 新增分类
+          '../static/平面设计/大作业：浪漫风格.png',
+          '../static/平面设计/大作业：异域风格.png'
+        ]
+      };
+
+      const worksList = document.querySelector('.works-list');
+      const videoList = document.querySelector('.video-list');
+      const modelList = document.querySelector('.model-list');
+      const newList = document.querySelector('.new-list');
+
+      document.querySelectorAll('.load-more-btn').forEach(button => {
+        button.addEventListener('click', function () {
+          const type = this.getAttribute('data-type');
+          const container = {
+            graphic: worksList,
+            video: videoList,
+            new: newList,
+            model: modelList
+          }[type];
+
+          const imagesToShow = moreImages[type];
+          if (!imagesToShow || imagesToShow.length === 0) {
+            alert('没有更多图片了！');
+            return;
+          }
+
+          imagesToShow.forEach(src => {
+            if (type === 'video') {
+              // 创建 <video> 元素
+              const newVideo = document.createElement('video');
+              newVideo.className = 'video-img';
+              newVideo.controls = true;
+              // newVideo.style.width = '352px';
+              // newVideo.style.height = '264px';
+              // newVideo.style.objectFit = 'cover';
+              // newVideo.style.borderRadius = '8px';
+              // newVideo.style.cursor = 'zoom-in';
+
+              // 创建 source 元素并添加进去
+              const source = document.createElement('source');
+              source.src = src.src;      // 来自 moreImages[type]
+              source.type = src.type;    // video/mp4
+              source.setAttribute('type', src.type);
+
+              console.log('Adding source:', source);
+              newVideo.appendChild(source);
+              console.log('Adding newVideo:', newVideo);
+
+              // newVideo.textContent = '您的浏览器不支持 video 标签。'; // fallback 文案
+
+              // 设置 poster 封面图（可选）
+              // 获取第一帧作为封面图
+              getFirstFrame(newVideo, (cover) => {
+                newVideo.poster = cover;
+              });
+
+              bindImageClickEvents([newVideo]); // 绑定点击事件
+              container.appendChild(newVideo);
+            } else {
+              // 图片类型保持为 <img>
+              const img = document.createElement('img');
+              img.src = src;
+              img.alt = `${type === 'graphic' ? '平面设计' :
+                      type === 'video' ? '视频作品' :
+                              type === 'model' ? '3D建模' :
+                                      '新作品'} ${container.children.length + 1}`;
+
+              if (type === 'graphic') {
+                img.className = 'works-img';
+              } else if (type === 'video') {
+                img.className = 'video-img';
+              } else if (type === 'model') {
+                img.className = 'model-img';
+              } else if (type === 'new') {
+                img.className = 'new-img'; // 新增支持 new 类型
+              }
+
+              img.style.cursor = 'zoom-in';
+              bindImageClickEvents([img]);
+              container.appendChild(img);
+            }
+          });
+
+          moreImages[type] = []; // 清空已加载项
+          updateImageGroups(); // 更新分组图集
+          renderThumbs('', currentType); // 刷新缩略图（如果需要）
+        });
+      });
+    });
+
+  </script>
+</body>
+</html>
